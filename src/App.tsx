@@ -147,8 +147,8 @@ export default function App() {
 
       {/* Main Content Area */}
       <div className="relative z-20 flex min-h-screen flex-col justify-between px-3 py-4 sm:px-6 sm:py-6">
-        {/* Sticky/Fixed Floating Controls Top Bar */}
-        <header className="mx-auto w-full max-w-4xl">
+        {/* Top Header Bar */}
+        <header className="mx-auto w-full max-w-5xl">
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3">
             {/* Music Player */}
             <MusicPlayer />
@@ -157,10 +157,10 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => initGame()}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md ring-2 ring-pink-200 transition-transform active:scale-95"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs sm:text-sm shadow-md ring-2 ring-pink-200 transition-transform active:scale-95"
               >
-                <Shuffle className="w-3.5 h-3.5" />
-                <span>Xáo Trộn</span>
+                <Shuffle className="w-4 h-4" />
+                <span>Xáo Trộn Lại</span>
               </button>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function App() {
           <div className="mt-2 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm px-4 py-1 text-xs sm:text-sm font-bold text-rose-700 shadow-sm border border-rose-200 animate-float">
               <span>🌸</span>
-              <span className="tracking-wide">CHÚC MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10</span>
+              <span className="tracking-wide">CHÚC MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10 - LỚP 12A01</span>
               <span>🌸</span>
             </div>
 
@@ -244,7 +244,7 @@ export default function App() {
                     : 'text-rose-700 hover:bg-rose-100'
                 }`}
               >
-                3x3 (9 mảnh)
+                3x3 (9 ô)
               </button>
               <button
                 onClick={() => {
@@ -257,7 +257,7 @@ export default function App() {
                     : 'text-rose-700 hover:bg-rose-100'
                 }`}
               >
-                3x4 (12 mảnh)
+                3x4 (12 ô)
               </button>
               <button
                 onClick={() => {
@@ -270,11 +270,11 @@ export default function App() {
                     : 'text-rose-700 hover:bg-rose-100'
                 }`}
               >
-                4x4 (16 mảnh)
+                4x4 (16 ô)
               </button>
             </div>
 
-            {/* Stats: Timer, Moves, Progress, Hint */}
+            {/* Stats: Timer, Moves, Hint */}
             <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rose-100">
               <div className="flex items-center gap-1 text-xs font-bold text-rose-800">
                 <Clock className="w-3.5 h-3.5 text-rose-500" />
@@ -315,8 +315,8 @@ export default function App() {
           </div>
         </header>
 
-        {/* Central Puzzle Game Board */}
-        <main className="my-4 flex-1 flex flex-col justify-center">
+        {/* Central Synchronized Puzzle Game Board (Khung Tranh & Khay Mảnh Ghép) */}
+        <main className="my-5 flex-1 flex flex-col justify-center">
           <PuzzleBoard
             rows={gridSize.rows}
             cols={gridSize.cols}
@@ -330,7 +330,7 @@ export default function App() {
         </main>
 
         {/* Dedicated Class 12A01 Greeting Envelope Card */}
-        <div className="mx-auto w-full max-w-2xl mb-4">
+        <div className="mx-auto w-full max-w-3xl mb-4">
           <div className="rounded-2xl bg-white/85 backdrop-blur-md border-2 border-rose-200 shadow-md overflow-hidden transition-all">
             <button
               onClick={() => setIsLetterOpen(!isLetterOpen)}

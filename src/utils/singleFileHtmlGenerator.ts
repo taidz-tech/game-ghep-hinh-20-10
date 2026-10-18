@@ -1,20 +1,25 @@
-/**
- * Generates a complete, single-file HTML code containing all HTML, CSS, and JavaScript.
- * Ready for the user to copy or download as an independent .html file.
- */
+import { ROSE_BASE64, AODAI_BASE64 } from '../assets/themeImagesBase64.ts';
 
-export function generateSingleFileHtml(imageSrc: string): string {
+/**
+ * Generates a clean, pristine single-file HTML code with 0 stray comments or buttons.
+ * Contains all CSS, JS, audio synthesizer, falling petals, and base64 images.
+ * Ready to be deployed as index.html on GitHub Pages or double-clicked locally.
+ */
+export function generateSingleFileHtml(customImageSrc?: string): string {
+  const initialImage = customImageSrc && customImageSrc.startsWith('data:') 
+    ? customImageSrc 
+    : ROSE_BASE64;
+
   return `<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Ghép Hình 20/10 - Lớp 12A01</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Game Ghép Hình 20/10 - Dành Tặng Cô & Các Bạn Nữ Lớp 12A01</title>
+  <meta name="description" content="Trò chơi ghép hình chào mừng Ngày Phụ nữ Việt Nam 20/10 dành riêng cho tập thể Lớp 12A01.">
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
@@ -50,7 +55,6 @@ export function generateSingleFileHtml(imageSrc: string): string {
     .animate-green-glow {
       animation: greenGlow 0.8s ease-out;
     }
-    /* Custom scrollbar */
     ::-webkit-scrollbar { height: 8px; width: 8px; }
     ::-webkit-scrollbar-track { background: #fee2e2; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb { background: #f43f5e; border-radius: 9999px; }
@@ -58,17 +62,14 @@ export function generateSingleFileHtml(imageSrc: string): string {
 </head>
 <body class="relative text-gray-800">
 
-  <!-- Background Animated Petals & Sparkles Canvas -->
   <canvas id="petalCanvas" class="fixed inset-0 pointer-events-none z-10 w-full h-full"></canvas>
 
-  <!-- Main Container -->
-  <div class="relative z-20 min-h-screen flex flex-col justify-between p-3 sm:p-6 max-w-4xl mx-auto">
+  <div class="relative z-20 min-h-screen flex flex-col justify-between p-3 sm:p-5 max-w-5xl mx-auto">
     
-    <!-- Top Header Bar -->
     <header class="flex flex-col items-center text-center pt-2 pb-4">
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs sm:text-sm font-bold shadow-sm border border-rose-200 mb-2">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100/90 text-rose-700 text-xs sm:text-sm font-bold shadow-sm border border-rose-200 mb-2">
         <span>🌸</span>
-        <span>CHÀO MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10</span>
+        <span>CHÀO MỪNG NGÀY PHỤ NỮ VIỆT NAM 20/10 - LỚP 12A01</span>
         <span>🌸</span>
       </div>
 
@@ -76,61 +77,167 @@ export function generateSingleFileHtml(imageSrc: string): string {
         TRÒ CHƠI GHÉP HÌNH 20/10
       </h1>
 
-      <!-- Music & Controls Bar -->
-      <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
-        <button id="bgmToggleBtn" class="flex items-center gap-2 bg-white/90 hover:bg-white text-rose-700 px-4 py-2 rounded-full shadow-md border border-rose-200 text-xs sm:text-sm font-bold transition-transform active:scale-95">
-          <span id="discIcon" class="inline-block">💿</span>
-          <span id="bgmLabel">Bật Nhạc Nền</span>
-        </button>
-
-        <div class="flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full shadow-md border border-rose-200 text-xs font-semibold text-rose-800">
-          <span>Lưới:</span>
-          <button id="grid3x3Btn" class="px-2.5 py-1 rounded-full bg-rose-500 text-white shadow">3x3 (9 ô)</button>
-          <button id="grid3x4Btn" class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200">3x4 (12 ô)</button>
+      <div class="mt-4 w-full max-w-5xl bg-white/90 backdrop-blur-md p-3 sm:p-4 rounded-2xl shadow-lg border-2 border-rose-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-rose-800">Chủ đề:</span>
+          <button id="themeRoseBtn" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-sm ring-2 ring-pink-300">
+            🌹 Hoa Hồng 12A01
+          </button>
+          <button id="themeAodaiBtn" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200">
+            🪷 Cô Giáo Áo Dài
+          </button>
+          
+          <input type="file" id="customFileInput" accept="image/*" class="hidden">
+          <button id="customUploadBtn" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200">
+            📸 Tải Ảnh Riêng
+          </button>
         </div>
 
-        <button id="previewBtn" class="bg-white/90 hover:bg-white text-rose-700 px-3 py-2 rounded-full shadow-md border border-rose-200 text-xs font-semibold">
-          👁️ Xem ảnh mẫu
-        </button>
+        <div class="flex items-center gap-1.5 bg-rose-50 p-1 rounded-full border border-rose-200 text-xs font-semibold">
+          <span class="text-rose-800 ml-1">Độ khó:</span>
+          <button id="grid3x3Btn" class="px-2.5 py-1 rounded-full bg-rose-500 text-white shadow">3x3 (9 ô)</button>
+          <button id="grid3x4Btn" class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200">3x4 (12 ô)</button>
+          <button id="grid4x4Btn" class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200">4x4 (16 ô)</button>
+        </div>
 
-        <button id="resetBtn" class="bg-rose-100 hover:bg-rose-200 text-rose-800 px-3 py-2 rounded-full shadow-md border border-rose-300 text-xs font-bold">
-          🔄 Xáo Trộn Lại
-        </button>
+        <div class="flex items-center gap-3">
+          <div class="text-xs font-bold text-rose-800 flex items-center gap-1">
+            <span>⏱️</span>
+            <span id="timerDisplay">00:00</span>
+          </div>
+
+          <div class="text-xs font-bold text-rose-800">
+            🎯 <span id="movesCount">0</span> lượt
+          </div>
+
+          <button id="hintBtn" class="px-2.5 py-1 rounded-full bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-xs border border-amber-300">
+            💡 Gợi Ý
+          </button>
+
+          <button id="bgmToggleBtn" class="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1 rounded-full border border-rose-200 text-xs font-bold">
+            <span id="discIcon">💿</span>
+            <span id="bgmLabel">Nhạc Nền</span>
+          </button>
+
+          <button id="resetBtn" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1 rounded-full shadow text-xs font-bold">
+            🔄 Xáo Trộn
+          </button>
+        </div>
+      </div>
+
+      <div class="w-full max-w-5xl mt-3 px-1">
+        <div class="flex items-center justify-between text-xs font-bold text-rose-700 mb-1">
+          <span>Tiến độ ghép: <span id="progressCount">0/9</span> mảnh</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="w-full h-2.5 bg-white/80 rounded-full overflow-hidden border border-rose-200 shadow-inner">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-pink-400 via-rose-500 to-rose-600 transition-all duration-300 rounded-full" style="width: 0%"></div>
+        </div>
       </div>
     </header>
 
-    <!-- Alert / Toast Banner -->
     <div id="toastContainer" class="h-10 flex items-center justify-center mb-2">
       <div id="toastBox" class="hidden text-center py-1.5 px-5 rounded-full text-xs sm:text-sm font-bold shadow transition-all"></div>
     </div>
 
-    <!-- Puzzle Board Frame -->
-    <main class="flex flex-col items-center">
-      <div class="w-full max-w-md sm:max-w-lg bg-white/90 backdrop-blur-md p-3 sm:p-5 rounded-3xl shadow-2xl border-4 border-rose-300 ring-4 ring-pink-100/50">
-        <!-- Target Grid -->
+    <!-- MAIN GAME AREA: 2 PANELS SIDE-BY-SIDE -->
+    <main class="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 px-1 items-start">
+      
+      <!-- PANEL 1: KHUNG GHÉP TRANH -->
+      <div class="w-full flex flex-col rounded-3xl bg-white/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border-4 border-rose-300 ring-4 ring-pink-100/70">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-rose-100">
+          <div class="flex items-center gap-2">
+            <span class="flex h-3 w-3 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+            </span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-rose-900 font-serif-title">
+                Khung Ghép Tranh
+              </h3>
+              <p class="text-[11px] text-rose-600 font-medium">
+                Bấm ô hoặc kéo thả mảnh ghép vào
+              </p>
+            </div>
+          </div>
+
+          <span id="unplacedBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">
+            Còn 9 ô trống
+          </span>
+        </div>
+
         <div id="puzzleGrid" class="relative w-full aspect-square rounded-2xl overflow-hidden bg-rose-200 shadow-inner grid gap-[3px] p-[3px]">
           <!-- Slots rendered dynamically -->
         </div>
+
+        <div class="mt-3 flex items-center justify-between text-xs text-rose-700">
+          <span>👉 Bấm mảnh ghép bên phải rồi bấm vào ô này</span>
+          <span id="selectedPieceStatus" class="text-gray-400 font-medium">Chưa chọn mảnh</span>
+        </div>
       </div>
 
-      <!-- Tray Container -->
-      <div class="w-full max-w-2xl mt-5 bg-white/90 backdrop-blur-md p-4 rounded-3xl shadow-xl border-3 border-rose-200">
-        <div class="flex items-center justify-between pb-2 mb-2 border-b border-rose-100">
-          <div class="flex items-center gap-2 text-rose-900 font-bold text-sm">
-            <span>✨</span>
-            <span>Khay Mảnh Ghép (<span id="remainingCount">9</span> mảnh còn lại)</span>
+      <!-- PANEL 2: KHAY TOÀN BỘ MẢNH GHÉP (HIỂN THỊ ĐẦY ĐỦ, SONG SONG) -->
+      <div class="w-full flex flex-col rounded-3xl bg-white/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border-3 border-rose-200">
+        <div class="flex items-center justify-between pb-3 mb-3 border-b border-rose-100">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 rounded-xl bg-rose-500 text-white shadow-sm text-sm">✨</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-rose-900 font-serif-title">
+                Toàn Bộ Mảnh Ghép (<span id="trayCount">9</span> mảnh)
+              </h3>
+              <p class="text-[11px] text-rose-600 font-medium">
+                Hiển thị đầy đủ tất cả các mảnh ghép
+              </p>
+            </div>
           </div>
-          <span class="text-[11px] text-rose-600 font-medium">Bấm chọn mảnh rồi bấm vào ô số, hoặc kéo thả!</span>
+
+          <button id="deselectBtn" class="hidden text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200">
+            Hủy chọn
+          </button>
         </div>
 
-        <div id="piecesTray" class="flex items-center gap-3 overflow-x-auto py-2 px-1 min-h-[90px]">
+        <div id="piecesTray" class="grid gap-2 sm:gap-2.5 p-1">
           <!-- Pieces rendered dynamically -->
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] text-gray-500">
+          <span>🖱️ Kéo thả hoặc bấm chọn mảnh</span>
+          <span id="trayFooterInfo" class="font-semibold text-rose-600">Còn 9/9 mảnh</span>
         </div>
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="mt-6 text-center text-xs text-rose-500 font-medium py-3">
+    <!-- Class 12A01 Congratulatory Card -->
+    <div class="mx-auto w-full max-w-3xl my-6">
+      <div class="rounded-3xl bg-white/90 backdrop-blur-md border-2 border-rose-200 shadow-md overflow-hidden">
+        <button id="toggleLetterBtn" class="w-full flex items-center justify-between p-4 text-left bg-gradient-to-r from-rose-50 to-pink-50 hover:bg-rose-100/70 transition-colors">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">💌</span>
+            <span class="font-bold text-sm sm:text-base text-rose-900 font-serif-title">
+              Bức Thư Tri Ân & Chúc Mừng 20/10 Gửi Lớp 12A01
+            </span>
+          </div>
+          <span id="letterArrow" class="text-rose-600 font-bold text-lg">▼</span>
+        </button>
+
+        <div id="letterContent" class="hidden p-5 sm:p-6 border-t border-rose-100 text-sm leading-relaxed text-gray-700 bg-white/95 space-y-3 font-sans">
+          <p class="font-serif-title italic font-bold text-rose-700 text-base">
+            Kính gửi Cô và toàn thể các bạn nữ của tập thể 12A01,
+          </p>
+          <p>
+            Nhân ngày Phụ nữ Việt Nam 20/10, chúng em xin gửi đến Cô lời tri ân sâu sắc nhất. Chúc Cô luôn mạnh khỏe, tươi trẻ và hạnh phúc!
+          </p>
+          <p>
+            Gửi đến tất cả các bạn nữ 12A01: Chúc các bạn có một ngày 20/10 thật vui và những nụ cười rạng rỡ nhất. Chúc các bạn luôn tự tin, kiên cường và cố gắng chạm tay đến cánh cửa đại học mơ ước! 🌸💖
+          </p>
+          <div class="pt-2 text-right font-serif-title font-bold text-rose-600">
+            -Tập thể lớp 12A01-
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-4 text-center text-xs text-rose-600 font-medium py-3">
       Tập thể Lớp 12A01 chúc một nửa thế giới luôn xinh đẹp, rạng rỡ và hạnh phúc! 💖
     </footer>
   </div>
@@ -148,7 +255,6 @@ export function generateSingleFileHtml(imageSrc: string): string {
         Bạn đã hoàn thành bức tranh 20/10 một cách hoàn hảo!
       </p>
 
-      <!-- Exact Required Message Card -->
       <div class="my-5 p-5 bg-white/95 rounded-2xl border-2 border-rose-300 shadow-md text-left space-y-3 text-xs sm:text-sm text-gray-800 leading-relaxed font-sans">
         <div class="text-[11px] font-bold text-rose-500 uppercase tracking-widest text-center mb-1">💌 LỜI CHÚC YÊU THƯƠNG 💌</div>
         <p class="font-serif-title font-bold text-rose-700 text-sm sm:text-base">
@@ -176,23 +282,21 @@ export function generateSingleFileHtml(imageSrc: string): string {
     </div>
   </div>
 
-  <!-- Preview Modal -->
-  <div id="previewModal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center p-4 bg-black/85 cursor-pointer">
-    <img id="previewImage" src="${imageSrc}" class="max-h-[80vh] max-w-[90vw] rounded-2xl shadow-2xl border-2 border-white/60">
-    <p class="mt-3 text-white text-sm font-semibold">Bấm vào bất kỳ đâu để đóng ảnh mẫu</p>
-  </div>
-
   <script>
-    // --- Configuration & State ---
-    const IMAGE_URL = '${imageSrc}';
+    const THEME_ROSE = '${ROSE_BASE64}';
+    const THEME_AODAI = '${AODAI_BASE64}';
+    let currentImageSrc = '${initialImage}';
+
     let rows = 3;
     let cols = 3;
     let pieces = [];
-    let placedMap = {}; // slotId -> pieceId
+    let placedMap = {};
     let selectedPieceId = null;
     let draggedPieceId = null;
+    let moves = 0;
+    let seconds = 0;
+    let timerInterval = null;
 
-    // --- Audio Synthesizer (Zero External File Dependencies) ---
     const AudioEngine = {
       ctx: null,
       bgmPlaying: false,
@@ -265,11 +369,11 @@ export function generateSingleFileHtml(imageSrc: string): string {
         if (this.bgmPlaying) {
           this.bgmPlaying = false;
           if (this.bgmTimeout) clearTimeout(this.bgmTimeout);
-          document.getElementById('bgmLabel').innerText = 'Bật Nhạc Nền';
+          document.getElementById('bgmLabel').innerText = 'Nhạc Nền';
           document.getElementById('discIcon').classList.remove('animate-spin');
         } else {
           this.bgmPlaying = true;
-          document.getElementById('bgmLabel').innerText = 'Nhạc Nền Đang Bật';
+          document.getElementById('bgmLabel').innerText = 'Đang Bật';
           document.getElementById('discIcon').classList.add('animate-spin');
           this.playBgmLoop();
         }
@@ -304,36 +408,47 @@ export function generateSingleFileHtml(imageSrc: string): string {
       }
     };
 
-    // --- Toast Notifications ---
     function showToast(text, isError) {
       const box = document.getElementById('toastBox');
       box.innerText = text;
       box.className = 'text-center py-1.5 px-5 rounded-full text-xs sm:text-sm font-bold shadow ' + 
         (isError ? 'bg-rose-100 text-rose-800 border-2 border-rose-400 animate-shake' : 'bg-emerald-100 text-emerald-800 border-2 border-emerald-400');
       box.classList.remove('hidden');
-      setTimeout(() => { box.classList.add('hidden'); }, 2000);
+      setTimeout(() => { box.classList.add('hidden'); }, 2200);
     }
 
-    // --- Game Logic ---
     function initGame() {
       placedMap = {};
       selectedPieceId = null;
       draggedPieceId = null;
+      moves = 0;
+      seconds = 0;
+      document.getElementById('movesCount').innerText = '0';
+      document.getElementById('timerDisplay').innerText = '00:00';
+      document.getElementById('deselectBtn').classList.add('hidden');
+      document.getElementById('selectedPieceStatus').innerText = 'Chưa chọn mảnh';
+      document.getElementById('victoryModal').classList.add('hidden');
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('timerDisplay').innerText = m + ':' + s;
+      }, 1000);
+
       const total = rows * cols;
       pieces = [];
-
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           pieces.push({ id: r * cols + c + 1, row: r, col: c });
         }
       }
-
-      // Shuffle pieces
       pieces = pieces.sort(() => Math.random() - 0.5);
 
       renderGrid();
       renderTray();
-      document.getElementById('victoryModal').classList.add('hidden');
+      updateProgress();
     }
 
     function renderGrid() {
@@ -347,18 +462,28 @@ export function generateSingleFileHtml(imageSrc: string): string {
         const slot = document.createElement('div');
         slot.id = 'slot-' + i;
         slot.dataset.slotId = i;
-        slot.className = 'relative flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden rounded-lg select-none bg-white border border-dashed border-rose-300 hover:bg-pink-50';
-        
-        // Slot content: Clean white paper with clear sequence number
-        slot.innerHTML = '<div class="flex flex-col items-center justify-center w-full h-full bg-white">' +
-          '<span class="text-xl sm:text-2xl md:text-3xl font-extrabold text-rose-400 font-serif-title">' + i + '</span>' +
-          '<span class="text-[9px] sm:text-xs text-rose-300 font-medium">Ô ' + i + '</span>' +
-          '</div>';
+        const isPlaced = placedMap[i] === i;
+        const slotRow = Math.floor((i - 1) / cols);
+        const slotCol = (i - 1) % cols;
 
-        // Slot click handler
+        if (isPlaced) {
+          slot.className = 'relative flex items-center justify-center overflow-hidden rounded-lg select-none shadow-sm';
+          const x = cols > 1 ? (slotCol / (cols - 1)) * 100 : 0;
+          const y = rows > 1 ? (slotRow / (rows - 1)) * 100 : 0;
+          slot.style.backgroundImage = 'url(' + currentImageSrc + ')';
+          slot.style.backgroundSize = (cols * 100) + '% ' + (rows * 100) + '%';
+          slot.style.backgroundPosition = x + '% ' + y + '%';
+          slot.innerHTML = '<span class="absolute top-1 right-1 text-emerald-500 font-bold text-xs bg-white/80 rounded-full px-1">✓</span>';
+        } else {
+          slot.className = 'relative flex items-center justify-center transition-all cursor-pointer overflow-hidden rounded-lg select-none bg-white hover:bg-pink-50 border border-dashed border-rose-300 ' +
+            (selectedPieceId === i ? 'ring-4 ring-rose-400 bg-rose-50' : '');
+          slot.innerHTML = '<div class="flex flex-col items-center justify-center w-full h-full bg-white">' +
+            '<span class="text-xl sm:text-2xl md:text-3xl font-extrabold text-rose-400 font-serif-title">' + i + '</span>' +
+            '<span class="text-[9px] sm:text-xs text-rose-300 font-medium">Ô ' + i + '</span>' +
+            '</div>';
+        }
+
         slot.addEventListener('click', () => handleSlotClick(i));
-
-        // Drag & drop handlers
         slot.addEventListener('dragover', (e) => e.preventDefault());
         slot.addEventListener('drop', (e) => {
           e.preventDefault();
@@ -372,12 +497,16 @@ export function generateSingleFileHtml(imageSrc: string): string {
 
     function renderTray() {
       const tray = document.getElementById('piecesTray');
+      tray.style.gridTemplateColumns = 'repeat(' + (cols === 4 ? 4 : 3) + ', minmax(0, 1fr))';
       tray.innerHTML = '';
       const unplaced = pieces.filter(p => !Object.values(placedMap).includes(p.id));
-      document.getElementById('remainingCount').innerText = unplaced.length;
+
+      document.getElementById('trayCount').innerText = unplaced.length;
+      document.getElementById('unplacedBadge').innerText = unplaced.length > 0 ? ('Còn ' + unplaced.length + ' ô trống') : '🎉 Hoàn tất!';
+      document.getElementById('trayFooterInfo').innerText = 'Còn ' + unplaced.length + '/' + (rows * cols) + ' mảnh';
 
       if (unplaced.length === 0) {
-        tray.innerHTML = '<div class="w-full text-center text-emerald-600 font-bold py-2">✨ Đã ghép xong toàn bộ các mảnh!</div>';
+        tray.innerHTML = '<div class="col-span-full py-12 text-center text-emerald-600 font-bold bg-emerald-50 rounded-2xl border border-emerald-300">✨ Tuyệt vời! Bạn đã hoàn thành bức tranh 20/10!</div>';
         return;
       }
 
@@ -385,19 +514,33 @@ export function generateSingleFileHtml(imageSrc: string): string {
         const pieceEl = document.createElement('div');
         pieceEl.id = 'piece-' + p.id;
         pieceEl.draggable = true;
-        pieceEl.className = 'group relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl cursor-grab overflow-hidden shadow-md border-2 border-rose-200 hover:border-rose-400 transition-all select-none ' + 
-          (selectedPieceId === p.id ? 'ring-4 ring-rose-500 scale-105 shadow-xl' : 'hover:scale-105');
+        const isSelected = selectedPieceId === p.id;
+
+        pieceEl.className = 'group relative aspect-square rounded-xl cursor-grab overflow-hidden shadow-md border-2 border-rose-200 hover:border-rose-400 transition-all select-none ' + 
+          (isSelected ? 'ring-4 ring-rose-500 scale-105 shadow-xl z-10' : 'hover:scale-105 bg-white');
 
         const xPos = cols > 1 ? (p.col / (cols - 1)) * 100 : 0;
         const yPos = rows > 1 ? (p.row / (rows - 1)) * 100 : 0;
-        pieceEl.style.backgroundImage = 'url(' + IMAGE_URL + ')';
+        pieceEl.style.backgroundImage = 'url(' + currentImageSrc + ')';
         pieceEl.style.backgroundSize = (cols * 100) + '% ' + (rows * 100) + '%';
         pieceEl.style.backgroundPosition = xPos + '% ' + yPos + '%';
 
+        pieceEl.innerHTML = isSelected 
+          ? '<div class="absolute inset-0 bg-rose-500/25 ring-2 ring-inset ring-rose-500 flex items-center justify-center"><span class="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">Đã chọn</span></div>' 
+          : '';
+
         pieceEl.addEventListener('click', () => {
           AudioEngine.playClick();
-          selectedPieceId = selectedPieceId === p.id ? null : p.id;
+          selectedPieceId = isSelected ? null : p.id;
+          if (selectedPieceId) {
+            document.getElementById('deselectBtn').classList.remove('hidden');
+            document.getElementById('selectedPieceStatus').innerText = 'Đang chọn 1 mảnh ghép';
+          } else {
+            document.getElementById('deselectBtn').classList.add('hidden');
+            document.getElementById('selectedPieceStatus').innerText = 'Chưa chọn mảnh';
+          }
           renderTray();
+          renderGrid();
         });
 
         pieceEl.addEventListener('dragstart', (e) => {
@@ -411,9 +554,9 @@ export function generateSingleFileHtml(imageSrc: string): string {
 
     function handleSlotClick(slotId) {
       AudioEngine.playClick();
-      if (placedMap[slotId]) return; // already solved
+      if (placedMap[slotId]) return;
       if (!selectedPieceId) {
-        showToast('👉 Hãy chọn một mảnh ghép từ khay bên dưới trước nhé!', true);
+        showToast('👉 Hãy chọn một mảnh ghép ở khay bên phải trước nhé!', true);
         return;
       }
       handleAttempt(selectedPieceId, slotId);
@@ -421,62 +564,72 @@ export function generateSingleFileHtml(imageSrc: string): string {
 
     function handleAttempt(pieceId, slotId) {
       if (placedMap[slotId]) return;
+      moves++;
+      document.getElementById('movesCount').innerText = moves;
+
       const slotEl = document.getElementById('slot-' + slotId);
 
       if (pieceId === slotId) {
-        // Correct match!
         placedMap[slotId] = pieceId;
         selectedPieceId = null;
+        document.getElementById('deselectBtn').classList.add('hidden');
+        document.getElementById('selectedPieceStatus').innerText = 'Chưa chọn mảnh';
+
         AudioEngine.playCorrect();
-        showToast('✨ Tuyệt vời! Bạn đã ghép đúng ô số ' + slotId + '!', false);
+        showToast('✨ Tuyệt vời! Bạn đã ghép đúng vào ô số ' + slotId + '!', false);
 
-        // Fill slot with sliced piece image
-        const targetPiece = pieces.find(p => p.id === pieceId);
-        const xPos = cols > 1 ? (targetPiece.col / (cols - 1)) * 100 : 0;
-        const yPos = rows > 1 ? (targetPiece.row / (rows - 1)) * 100 : 0;
-        slotEl.style.backgroundImage = 'url(' + IMAGE_URL + ')';
-        slotEl.style.backgroundSize = (cols * 100) + '% ' + (rows * 100) + '%';
-        slotEl.style.backgroundPosition = xPos + '% ' + yPos + '%';
-        slotEl.innerHTML = '<span class="absolute top-1 right-1 text-emerald-500 font-bold text-xs bg-white/80 rounded-full px-1">✓</span>';
-        slotEl.classList.remove('bg-white', 'hover:bg-pink-50', 'border-dashed');
-        slotEl.classList.add('animate-green-glow', 'ring-4', 'ring-emerald-400');
-
-        setTimeout(() => {
-          slotEl.classList.remove('animate-green-glow', 'ring-4', 'ring-emerald-400');
-        }, 800);
-
+        renderGrid();
         renderTray();
+        updateProgress();
 
-        // Check victory
         if (Object.keys(placedMap).length === rows * cols) {
           triggerVictory();
         }
       } else {
-        // Wrong match!
         AudioEngine.playWrong();
         slotEl.classList.add('animate-shake', 'ring-4', 'ring-rose-500', 'bg-rose-100');
-        showToast('❌ Bạn đã ghép sai rồi! Hãy thử lại nhé.', true);
+        showToast('❌ Mảnh này không thuộc ô số ' + slotId + '! Hãy thử ô khác nhé.', true);
         setTimeout(() => {
           slotEl.classList.remove('animate-shake', 'ring-4', 'ring-rose-500', 'bg-rose-100');
         }, 600);
       }
     }
 
+    function updateProgress() {
+      const placed = Object.keys(placedMap).length;
+      const total = rows * cols;
+      const pct = Math.round((placed / total) * 100);
+      document.getElementById('progressCount').innerText = placed + '/' + total;
+      document.getElementById('progressPercent').innerText = pct + '%';
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    function handleHint() {
+      AudioEngine.playClick();
+      const total = rows * cols;
+      const unplaced = [];
+      for (let i = 1; i <= total; i++) {
+        if (!placedMap[i]) unplaced.push(i);
+      }
+      if (unplaced.length === 0) return;
+      const target = unplaced[0];
+      handleAttempt(target, target);
+    }
+
     function triggerVictory() {
+      clearInterval(timerInterval);
       AudioEngine.playVictory();
-      // Multi-salvo confetti
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       setTimeout(() => {
-        confetti({ particleCount: 100, angle: 60, spread: 60, origin: { x: 0 } });
-        confetti({ particleCount: 100, angle: 120, spread: 60, origin: { x: 1 } });
+        confetti({ particleCount: 90, angle: 60, spread: 60, origin: { x: 0 } });
+        confetti({ particleCount: 90, angle: 120, spread: 60, origin: { x: 1 } });
       }, 300);
 
       setTimeout(() => {
         document.getElementById('victoryModal').classList.remove('hidden');
-      }, 700);
+      }, 600);
     }
 
-    // --- Petals Canvas Background ---
     (function initPetals() {
       const cvs = document.getElementById('petalCanvas');
       const ctx = cvs.getContext('2d');
@@ -524,35 +677,80 @@ export function generateSingleFileHtml(imageSrc: string): string {
       loop();
     })();
 
-    // --- Controls Listeners ---
     document.getElementById('bgmToggleBtn').addEventListener('click', () => AudioEngine.toggleBGM());
     document.getElementById('resetBtn').addEventListener('click', () => { AudioEngine.playClick(); initGame(); });
+    document.getElementById('hintBtn').addEventListener('click', handleHint);
+    document.getElementById('deselectBtn').addEventListener('click', () => {
+      selectedPieceId = null;
+      document.getElementById('deselectBtn').classList.add('hidden');
+      document.getElementById('selectedPieceStatus').innerText = 'Chưa chọn mảnh';
+      renderTray();
+      renderGrid();
+    });
+
+    const roseBtn = document.getElementById('themeRoseBtn');
+    const aodaiBtn = document.getElementById('themeAodaiBtn');
+    roseBtn.addEventListener('click', () => {
+      currentImageSrc = THEME_ROSE;
+      roseBtn.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-sm ring-2 ring-pink-300';
+      aodaiBtn.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200';
+      initGame();
+    });
+    aodaiBtn.addEventListener('click', () => {
+      currentImageSrc = THEME_AODAI;
+      aodaiBtn.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white shadow-sm ring-2 ring-pink-300';
+      roseBtn.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200';
+      initGame();
+    });
+
+    const customFileInput = document.getElementById('customFileInput');
+    document.getElementById('customUploadBtn').addEventListener('click', () => customFileInput.click());
+    customFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target && event.target.result) {
+            currentImageSrc = event.target.result;
+            initGame();
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    const g3x3 = document.getElementById('grid3x3Btn');
+    const g3x4 = document.getElementById('grid3x4Btn');
+    const g4x4 = document.getElementById('grid4x4Btn');
+    function setGridMode(r, c, activeBtn) {
+      rows = r; cols = c;
+      [g3x3, g3x4, g4x4].forEach(b => b.className = 'px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200');
+      activeBtn.className = 'px-2.5 py-1 rounded-full bg-rose-500 text-white shadow';
+      initGame();
+    }
+    g3x3.addEventListener('click', () => setGridMode(3, 3, g3x3));
+    g3x4.addEventListener('click', () => setGridMode(3, 4, g3x4));
+    g4x4.addEventListener('click', () => setGridMode(4, 4, g4x4));
+
     document.getElementById('modalRestartBtn').addEventListener('click', () => { AudioEngine.playClick(); initGame(); });
     document.getElementById('modalConfettiBtn').addEventListener('click', () => {
       confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
       AudioEngine.playCorrect();
     });
 
-    // Preview
-    const prevModal = document.getElementById('previewModal');
-    document.getElementById('previewBtn').addEventListener('click', () => { prevModal.classList.remove('hidden'); });
-    prevModal.addEventListener('click', () => { prevModal.classList.add('hidden'); });
-
-    // Grid selection
-    document.getElementById('grid3x3Btn').addEventListener('click', function() {
-      rows = 3; cols = 3;
-      this.className = 'px-2.5 py-1 rounded-full bg-rose-500 text-white shadow';
-      document.getElementById('grid3x4Btn').className = 'px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200';
-      initGame();
-    });
-    document.getElementById('grid3x4Btn').addEventListener('click', function() {
-      rows = 3; cols = 4;
-      this.className = 'px-2.5 py-1 rounded-full bg-rose-500 text-white shadow';
-      document.getElementById('grid3x3Btn').className = 'px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200';
-      initGame();
+    const letterContent = document.getElementById('letterContent');
+    const letterArrow = document.getElementById('letterArrow');
+    document.getElementById('toggleLetterBtn').addEventListener('click', () => {
+      const isHidden = letterContent.classList.contains('hidden');
+      if (isHidden) {
+        letterContent.classList.remove('hidden');
+        letterArrow.innerText = '▲';
+      } else {
+        letterContent.classList.add('hidden');
+        letterArrow.innerText = '▼';
+      }
     });
 
-    // Start game on load
     window.addEventListener('DOMContentLoaded', initGame);
   </script>
 </body>

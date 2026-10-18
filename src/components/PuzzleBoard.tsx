@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { PuzzlePiece } from '../types.ts';
 import { checkPlacement } from '../utils/puzzleLogic.ts';
 import { sound } from '../utils/audioSystem.ts';
-import { CheckCircle2, Sparkles, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Sparkles, Check } from 'lucide-react';
 
 interface PuzzleBoardProps {
   rows: number;
@@ -26,14 +26,14 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
   onAttemptFail,
 }) => {
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null);
+  const [hoveredPieceId, setHoveredPieceId] = useState<number | null>(null);
   const [draggedPieceId, setDraggedPieceId] = useState<number | null>(null);
   const [errorSlotId, setErrorSlotId] = useState<number | null>(null);
   const [glowSlotId, setGlowSlotId] = useState<number | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{
-    type: 'error' | 'success';
+    type: 'error' | 'success' | 'info';
     text: string;
   } | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
 
   const totalSlots = rows * cols;
   const unplacedPieces = pieces.filter((p) => !Object.values(placedMap).includes(p.id));
@@ -42,7 +42,7 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
     setErrorSlotId(slotId);
     setFeedbackMessage({
       type: 'error',
-      text: '❌ Bạn đã ghép sai rồi! Hãy thử lại nhé.',
+      text: `❌ Mảnh này không phải ở ô số ${slotId}! Bạn hãy thử ô khác nhé.`,
     });
     sound.playWrong();
     onAttemptFail();
@@ -56,7 +56,7 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
     setGlowSlotId(slotId);
     setFeedbackMessage({
       type: 'success',
-      text: `✨ Tuyệt vời! Bạn đã ghép đúng vị trí ô số ${slotId}!`,
+      text: `✨ Chuẩn xác! Bạn đã ghép đúng vào ô số ${slotId}!`,
     });
     sound.playCorrect();
     onPiecePlaced(pieceId, slotId);
@@ -70,12 +70,18 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
   const handleSlotClick = (slotId: number) => {
     sound.playClick();
 
-    if (placedMap[slotId]) return;
+    if (placedMap[slotId]) {
+      setFeedbackMessage({
+        type: 'info',
+        text: `Ô số ${slotId} đã được ghép thành công rồi!`,
+      });
+      return;
+    }
 
     if (selectedPieceId === null) {
       setFeedbackMessage({
-        type: 'error',
-        text: '👉 Hãy bấm chọn một mảnh ghép ở khay bên cạnh trước nhé!',
+        type: 'info',
+        text: '👉 Hãy bấm chọn một mảnh ghép ở khay bên phải trước nhé!',
       });
       return;
     }
@@ -120,14 +126,16 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Toast Notification Alert Banner */}
-      <div className="min-h-12 flex items-center justify-center w-full max-w-xl mb-3 px-2">
+      {/* Toast Notification Banner */}
+      <div className="min-h-11 flex items-center justify-center w-full max-w-2xl mb-3 px-2">
         {feedbackMessage && (
           <div
             className={`w-full text-center py-2 px-5 rounded-full text-xs sm:text-sm font-bold shadow-md transition-all duration-300 ${
               feedbackMessage.type === 'error'
                 ? 'bg-rose-100 text-rose-800 border-2 border-rose-400 animate-shake'
-                : 'bg-emerald-100 text-emerald-800 border-2 border-emerald-400 animate-pulse'
+                : feedbackMessage.type === 'success'
+                ? 'bg-emerald-100 text-emerald-800 border-2 border-emerald-400 animate-pulse'
+                : 'bg-amber-100 text-amber-800 border-2 border-amber-300'
             }`}
           >
             {feedbackMessage.text}
@@ -135,178 +143,175 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
         )}
       </div>
 
-      {/* Side-by-side on desktop (lg:flex-row), stacked on mobile */}
-      <div className="w-full max-w-5xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 px-2">
-        {/* Left Column: Puzzle Board */}
-        <div className="w-full max-w-md sm:max-w-lg lg:w-[460px] flex-shrink-0">
-          <div className="relative p-3.5 sm:p-4 rounded-3xl bg-white/90 backdrop-blur-md shadow-2xl border-4 border-rose-300 ring-4 ring-pink-100/70">
-            {/* Top Bar with title & Preview toggle */}
-            <div className="flex items-center justify-between mb-3 px-1">
-              <div className="flex items-center gap-2">
-                <span className="flex h-3 w-3 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-                </span>
-                <span className="text-xs sm:text-sm font-bold text-rose-900 font-serif">
-                  {imageTitle}
-                </span>
+      {/* 2-Panel Side-by-Side: Khung Ghép Tranh & Khay Mảnh Ghép */}
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 px-2 sm:px-4 items-start">
+        
+        {/* PANEL 1: KHUNG GHÉP TRANH */}
+        <div className="w-full flex flex-col rounded-3xl bg-white/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border-4 border-rose-300 ring-4 ring-pink-100/70">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-rose-100">
+            <div className="flex items-center gap-2">
+              <span className="flex h-3 w-3 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+              </span>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-rose-900 font-serif">
+                  Khung Ghép Tranh
+                </h3>
+                <p className="text-[11px] text-rose-600 font-medium">
+                  Bấm ô hoặc kéo thả mảnh ghép vào vị trí
+                </p>
               </div>
-
-              <button
-                onClick={() => setShowPreview(!showPreview)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 hover:bg-rose-200 text-rose-700 transition-colors shadow-sm"
-                aria-label={showPreview ? 'Ẩn ảnh mẫu' : 'Xem ảnh mẫu gốc'}
-              >
-                {showPreview ? (
-                  <>
-                    <EyeOff className="w-3.5 h-3.5" />
-                    Ẩn ảnh mẫu
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-3.5 h-3.5" />
-                    Xem ảnh mẫu
-                  </>
-                )}
-              </button>
             </div>
 
-            {/* Puzzle Grid */}
-            <div
-              className="relative w-full aspect-square overflow-hidden rounded-2xl bg-white shadow-inner border-2 border-rose-200"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-                gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
-                gap: '3px',
-                padding: '3px',
-                backgroundColor: '#fecdd3', // soft rose dividing borders
-              }}
-            >
-              {Array.from({ length: totalSlots }).map((_, idx) => {
-                const slotId = idx + 1;
-                const placedPieceId = placedMap[slotId];
-                const isCorrectlyPlaced = placedPieceId === slotId;
-                const isError = errorSlotId === slotId;
-                const isGlow = glowSlotId === slotId;
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">
+              {unplacedPieces.length > 0 ? `Còn ${unplacedPieces.length} ô trống` : '🎉 Hoàn tất!'}
+            </span>
+          </div>
 
-                const slotRow = Math.floor(idx / cols);
-                const slotCol = idx % cols;
+          {/* Interactive Target Grid */}
+          <div
+            className="relative w-full aspect-square overflow-hidden rounded-2xl bg-white shadow-inner border-2 border-rose-200"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+              gap: '3px',
+              padding: '3px',
+              backgroundColor: '#fecdd3',
+            }}
+          >
+            {Array.from({ length: totalSlots }).map((_, idx) => {
+              const slotId = idx + 1;
+              const placedPieceId = placedMap[slotId];
+              const isCorrectlyPlaced = placedPieceId === slotId;
+              const isError = errorSlotId === slotId;
+              const isGlow = glowSlotId === slotId;
+              const isTargetOfSelected = selectedPieceId === slotId;
 
-                return (
-                  <div
-                    key={`slot-${slotId}`}
-                    onClick={() => handleSlotClick(slotId)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, slotId)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Ô số ${slotId}${isCorrectlyPlaced ? ' đã ghép đúng' : ' chưa ghép'}`}
-                    className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden rounded-lg select-none ${
-                      isCorrectlyPlaced
-                        ? 'shadow-sm'
-                        : 'bg-white hover:bg-pink-50/80 border border-dashed border-rose-300'
-                    } ${
-                      isError
-                        ? 'ring-4 ring-rose-500 bg-rose-100 animate-shake z-20'
-                        : ''
-                    } ${
-                      isGlow
-                        ? 'ring-4 ring-emerald-400 animate-green-glow z-20'
-                        : ''
-                    } ${
-                      selectedPieceId && !isCorrectlyPlaced
-                        ? 'hover:ring-2 hover:ring-rose-400'
-                        : ''
-                    }`}
-                    style={
-                      isCorrectlyPlaced
-                        ? {
-                            backgroundImage: `url(${imageSrc})`,
-                            backgroundSize: `${cols * 100}% ${rows * 100}%`,
-                            backgroundPosition: getBackgroundPosition(slotRow, slotCol),
-                          }
-                        : {}
-                    }
-                  >
-                    {/* Clean pure white slot with clear sequence number */}
-                    {!isCorrectlyPlaced && (
-                      <div className="flex flex-col items-center justify-center w-full h-full p-1 bg-white">
-                        <span className="text-xl sm:text-2xl md:text-3xl font-extrabold text-rose-400/90 font-serif tracking-tight drop-shadow-sm">
-                          {slotId}
-                        </span>
-                        <span className="text-[10px] sm:text-xs text-rose-300 font-medium">
-                          Ô {slotId}
-                        </span>
-                      </div>
-                    )}
+              const slotRow = Math.floor(idx / cols);
+              const slotCol = idx % cols;
 
-                    {/* Tiny badge indicating completed slot */}
-                    {isCorrectlyPlaced && (
-                      <div className="absolute top-1 right-1 opacity-0 hover:opacity-100 transition-opacity bg-black/60 text-white rounded-full p-0.5 pointer-events-none">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* Overlay Reference Preview */}
-              {showPreview && (
+              return (
                 <div
-                  className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/85 p-3 text-white animate-fade-in"
-                  onClick={() => setShowPreview(false)}
+                  key={`slot-${slotId}`}
+                  onClick={() => handleSlotClick(slotId)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, slotId)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ô số ${slotId}${isCorrectlyPlaced ? ' đã ghép đúng' : ' chưa ghép'}`}
+                  className={`relative flex items-center justify-center transition-all duration-200 cursor-pointer overflow-hidden rounded-lg select-none ${
+                    isCorrectlyPlaced
+                      ? 'shadow-xs'
+                      : 'bg-white hover:bg-pink-50/90 border border-dashed border-rose-300'
+                  } ${
+                    isError
+                      ? 'ring-4 ring-rose-500 bg-rose-100 animate-shake z-20'
+                      : ''
+                  } ${
+                    isGlow
+                      ? 'ring-4 ring-emerald-400 animate-green-glow z-20'
+                      : ''
+                  } ${
+                    isTargetOfSelected && !isCorrectlyPlaced
+                      ? 'ring-4 ring-rose-400 bg-rose-50/80 scale-[0.98]'
+                      : selectedPieceId && !isCorrectlyPlaced
+                      ? 'hover:ring-2 hover:ring-rose-400'
+                      : ''
+                  }`}
+                  style={
+                    isCorrectlyPlaced
+                      ? {
+                          backgroundImage: `url(${imageSrc})`,
+                          backgroundSize: `${cols * 100}% ${rows * 100}%`,
+                          backgroundPosition: getBackgroundPosition(slotRow, slotCol),
+                        }
+                      : {}
+                  }
                 >
-                  <img
-                    src={imageSrc}
-                    alt={imageTitle}
-                    className="max-h-[85%] max-w-[85%] rounded-xl object-contain shadow-2xl border-2 border-white/50"
-                  />
-                  <p className="mt-2 text-xs font-medium text-pink-200">
-                    (Bấm vào ảnh để đóng ảnh mẫu)
-                  </p>
+                  {!isCorrectlyPlaced && (
+                    <div className="flex flex-col items-center justify-center w-full h-full p-1 bg-white hover:bg-pink-50 transition-colors">
+                      <span className={`text-xl sm:text-2xl md:text-3xl font-extrabold font-serif tracking-tight drop-shadow-xs ${
+                        isTargetOfSelected ? 'text-rose-600 scale-110' : 'text-rose-400/90'
+                      }`}>
+                        {slotId}
+                      </span>
+                      <span className="text-[10px] sm:text-xs text-rose-300 font-medium">
+                        Ô {slotId}
+                      </span>
+                    </div>
+                  )}
+
+                  {isCorrectlyPlaced && (
+                    <div className="absolute top-1 right-1 bg-black/60 text-emerald-400 rounded-full p-0.5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 flex items-center justify-between text-xs text-rose-700">
+            <span>👉 Bấm mảnh ghép bên phải rồi bấm vào ô này</span>
+            {selectedPieceId ? (
+              <span className="font-bold text-rose-600">Đang chọn: Mảnh #{selectedPieceId}</span>
+            ) : (
+              <span className="text-gray-400">Chưa chọn mảnh</span>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Pieces Tray */}
-        <div className="w-full max-w-md sm:max-w-lg lg:flex-1 flex flex-col gap-3">
-          <div className="rounded-3xl bg-white/90 backdrop-blur-md p-4 sm:p-5 shadow-xl border-3 border-rose-200">
-            {/* Tray Header */}
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-rose-100">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-full bg-rose-500 text-white shadow-sm">
-                  <Sparkles className="w-4 h-4" />
-                </span>
-                <h3 className="text-sm sm:text-base font-bold text-rose-900 font-serif">
-                  Khay Mảnh Ghép ({unplacedPieces.length} mảnh còn lại)
-                </h3>
-              </div>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700">
-                {selectedPieceId ? 'Đang chọn 1 mảnh ghép' : 'Chưa chọn mảnh nào'}
+        {/* PANEL 2: KHAY TOÀN BỘ MẢNH GHÉP (HIỂN THỊ ĐẦY ĐỦ, SONG SONG) */}
+        <div className="w-full flex flex-col rounded-3xl bg-white/95 backdrop-blur-md p-4 sm:p-5 shadow-xl border-3 border-rose-200">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-rose-100">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-xl bg-rose-500 text-white shadow-sm">
+                <Sparkles className="w-4 h-4" />
               </span>
-            </div>
-
-            {/* Instruction Callout */}
-            <div className="mb-3 p-2.5 rounded-xl bg-rose-50/70 border border-rose-100 text-xs text-rose-800 leading-snug flex items-start gap-2">
-              <span className="text-sm">💡</span>
               <div>
-                <strong>Cách chơi rất dễ:</strong> Bấm chọn một mảnh ghép dưới đây (hoặc kéo thả) rồi bấm vào ô số chuẩn trên khung tranh bên trái!
+                <h3 className="text-sm sm:text-base font-bold text-rose-900 font-serif">
+                  Toàn Bộ Mảnh Ghép ({unplacedPieces.length} mảnh)
+                </h3>
+                <p className="text-[11px] text-rose-600 font-medium">
+                  Hiển thị đầy đủ tất cả các mảnh ghép
+                </p>
               </div>
             </div>
 
-            {/* Pieces Grid or Scrollable Tray */}
-            {unplacedPieces.length === 0 ? (
-              <div className="py-10 text-center text-emerald-600 font-bold flex flex-col items-center gap-2">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500 animate-bounce" />
-                <span className="text-base sm:text-lg">Tuyệt vời! Bạn đã ghép xong toàn bộ bức tranh!</span>
-              </div>
+            {selectedPieceId ? (
+              <button
+                onClick={() => setSelectedPieceId(null)}
+                className="text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors"
+              >
+                Hủy chọn
+              </button>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-[360px] overflow-y-auto p-1">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-pink-100 text-rose-700">
+                Chọn 1 mảnh
+              </span>
+            )}
+          </div>
+
+          {/* Full Grid of Pieces: Render ALL pieces clearly */}
+          {unplacedPieces.length === 0 ? (
+            <div className="py-14 text-center text-emerald-600 font-bold flex flex-col items-center justify-center gap-2 bg-emerald-50/60 rounded-2xl border-2 border-dashed border-emerald-300">
+              <CheckCircle2 className="w-14 h-14 text-emerald-500 animate-bounce" />
+              <span className="text-base sm:text-lg font-serif">Tuyệt vời! Bạn đã hoàn thành bức tranh 20/10!</span>
+              <span className="text-xs text-emerald-700">Xin chúc mừng tập thể Lớp 12A01!</span>
+            </div>
+          ) : (
+            <div className="w-full">
+              <div
+                className="grid gap-2 sm:gap-2.5 p-1"
+                style={{
+                  gridTemplateColumns: `repeat(${cols === 4 ? 4 : 3}, minmax(0, 1fr))`,
+                }}
+              >
                 {unplacedPieces.map((piece) => {
                   const isSelected = selectedPieceId === piece.id;
+                  const isHovered = hoveredPieceId === piece.id;
 
                   return (
                     <div
@@ -317,13 +322,17 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
                         sound.playClick();
                         setSelectedPieceId(isSelected ? null : piece.id);
                       }}
+                      onMouseEnter={() => setHoveredPieceId(piece.id)}
+                      onMouseLeave={() => setHoveredPieceId(null)}
                       role="button"
                       tabIndex={0}
-                      aria-label={`Mảnh ghép ${isSelected ? 'đang được chọn' : ''}`}
+                      aria-label={`Mảnh ghép ${isSelected ? 'đang chọn' : ''}`}
                       className={`group relative aspect-square rounded-xl cursor-grab active:cursor-grabbing overflow-hidden transition-all duration-200 select-none ${
                         isSelected
-                          ? 'ring-4 ring-rose-500 shadow-xl scale-105 z-10'
-                          : 'hover:scale-105 shadow-md border-2 border-rose-200 hover:border-rose-400 bg-white'
+                          ? 'ring-4 ring-rose-500 shadow-2xl scale-105 z-20'
+                          : isHovered
+                          ? 'scale-105 shadow-lg border-2 border-rose-400 z-10'
+                          : 'shadow-md border-2 border-rose-200 hover:border-rose-400 bg-white'
                       }`}
                       style={{
                         backgroundImage: `url(${imageSrc})`,
@@ -331,16 +340,29 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({
                         backgroundPosition: getBackgroundPosition(piece.row, piece.col),
                       }}
                     >
-                      {/* Selection glow border */}
+                      {/* Selection overlay */}
                       {isSelected && (
-                        <div className="absolute inset-0 bg-rose-500/20 pointer-events-none ring-2 ring-inset ring-rose-400 animate-pulse" />
+                        <div className="absolute inset-0 bg-rose-500/25 ring-2 ring-inset ring-rose-500 flex items-center justify-center">
+                          <span className="bg-rose-600 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center gap-1">
+                            <Check className="w-3 h-3" />
+                            Đã chọn
+                          </span>
+                        </div>
                       )}
                     </div>
                   );
                 })}
               </div>
-            )}
-          </div>
+
+              {/* Status footer for tray */}
+              <div className="mt-3 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] text-gray-500">
+                <span>🖱️ Kéo thả hoặc bấm chọn mảnh rồi bấm ô</span>
+                <span className="font-semibold text-rose-600">
+                  Còn {unplacedPieces.length}/{totalSlots} mảnh
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
