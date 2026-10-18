@@ -1,0 +1,6 @@
+{
+  "name": "Game Ghép Hình 20/10 - Dành Tặng Cô và Các Bạn Nữ Lớp 12A01",
+  "description": "Trang web trò chơi ghép hình mừng Ngày Phụ nữ Việt Nam 20/10 cực kỳ lộng lẫy và ngọt ngào với hiệu ứng hoa hồng rơi, nhạc nền du dương và thiệp chúc mừng ý nghĩa dành riêng cho tập thể lớp 12A01.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
