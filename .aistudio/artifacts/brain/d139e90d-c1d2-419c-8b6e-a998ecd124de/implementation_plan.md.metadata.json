@@ -1,0 +1,6 @@
+{
+  "summary": "Kế hoạch cấu hình GitHub Actions tự động build và xuất bản trang web lên GitHub Pages khi người dùng đưa toàn bộ mã nguồn lên GitHub. Bao gồm cấu hình base path tương đối trong vite.config.ts, tệp workflow .github/workflows/deploy.yml, dọn dẹp các tệp tạm, và hướng dẫn kích hoạt GitHub Actions trong Settings của kho lưu trữ.",
+  "updatedAt": "2026-10-18T04:55:07.350572560Z",
+  "requestFeedback": true,
+  "userFacing": true
+}
